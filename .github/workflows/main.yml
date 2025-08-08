@@ -1,1 +1,57 @@
+name: Build Android APK (Godot 4)
 
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip libxi6 libxrender1 libxinerama1 libglu1-mesa
+
+      - name: Download Godot 4 (headless) & export templates
+        run: |
+          GODOT_VER=4.2.2
+          mkdir -p $HOME/godot
+          wget -q https://downloads.tuxfamily.org/godotengine/$GODOT_VER/Godot_v${GODOT_VER}-stable_linux.x86_64.zip -O $HOME/godot/godot.zip
+          wget -q https://downloads.tuxfamily.org/godotengine/$GODOT_VER/Godot_v${GODOT_VER}-stable_export_templates.tpz -O $HOME/godot/templates.tpz
+          unzip -q $HOME/godot/godot.zip -d $HOME/godot/
+          mv $HOME/godot/Godot_v${GODOT_VER}-stable_linux.x86_64 $HOME/godot/godot
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VER}.stable
+          unzip -q $HOME/godot/templates.tpz -d ~/.local/share/godot/export_templates/${GODOT_VER}.stable
+
+      - name: Prepare build dir
+        run: mkdir -p build
+
+      - name: Export Android APK
+        env:
+          GODOT_VER: "4.2.2"
+        run: |
+          # Путь экспорта также прописан в export_presets.cfg
+          $HOME/godot/godot --headless --path . --export-release "Android" build/CyberCityMobile.apk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CyberCityMobile-APK
+          path: build/CyberCityMobile.apk
+
+      - name: Create GitHub Release (optional)
+        if: startsWith(github.ref, 'refs/heads/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: CyberCityMobile v${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: build/CyberCityMobile.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
