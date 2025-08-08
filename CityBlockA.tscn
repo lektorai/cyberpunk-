@@ -1,0 +1,64 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(20,0.2,200)
+
+[sub_resource type="StandardMaterial3D" id="2"]
+albedo_color = Color(0.05, 0.05, 0.06, 1)
+emission_enabled = true
+emission = Color(0.0, 0.0, 0.0, 1)
+
+[sub_resource type="BoxMesh" id="3"]
+size = Vector3(6,12,6)
+
+[sub_resource type="StandardMaterial3D" id="4"]
+albedo_color = Color(0.02, 0.02, 0.05, 1)
+emission_enabled = true
+emission = Color(0.2, 0.0, 0.4, 1)
+emission_energy_multiplier = 2.5
+
+[node name="CityRoot" type="Node3D"]
+
+[node name="Road" type="MeshInstance3D" parent="."]
+mesh = SubResource("1")
+material_override = SubResource("2")
+transform = Transform3D(Basis(), Vector3(0,0,0))
+
+[node name="BuildingA" type="MeshInstance3D" parent="."]
+mesh = SubResource("3")
+material_override = SubResource("4")
+transform = Transform3D(Basis(), Vector3(-8,6,-20))
+
+[node name="BuildingB" type="MeshInstance3D" parent="."]
+mesh = SubResource("3")
+material_override = SubResource("4")
+transform = Transform3D(Basis(), Vector3(8,6,-60))
+
+[node name="NeonLight" type="OmniLight3D" parent="."]
+light_energy = 1.5
+transform = Transform3D(Basis(), Vector3(0,4,-10))
+
+[node name="PathForward" type="Path3D" parent="."]
+curve = SubResource("5")
+
+[sub_resource type="Curve3D" id="5"]
+_data = {
+"points": PoolVector3Array( 0,0,90,  0,0,30,  0,0,-30,  0,0,-90 )
+}
+
+[node name="PathBack" type="Path3D" parent="."]
+transform = Transform3D(Basis(), Vector3(4,0,0))
+curve = SubResource("6")
+
+[sub_resource type="Curve3D" id="6"]
+_data = {
+"points": PoolVector3Array( 4,0,-90,  4,0,-30,  4,0,30,  4,0,90 )
+}
+
+[node name="PedTargetA" type="Node3D" parent="."]
+transform = Transform3D(Basis(), Vector3(-5,0,-10))
+groups = ["ped_targets"]
+
+[node name="PedTargetB" type="Node3D" parent="."]
+transform = Transform3D(Basis(), Vector3(5,0,-50))
+groups = ["ped_targets"]
